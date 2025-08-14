@@ -1,4 +1,5 @@
 import {
+  ApiBearerAuth,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiParam,
@@ -6,6 +7,8 @@ import {
 } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { UserRole } from '@/common/enums/user-role';
 
 @ApiTags('users')
 @Controller('users')
@@ -13,6 +16,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get(':email')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiParam({
     name: 'email',
     type: String,

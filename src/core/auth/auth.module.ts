@@ -5,6 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersModule } from '@/resources/users/users.module';
 import { DatabaseModule } from '../database/database.module';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
@@ -13,12 +14,16 @@ import { DatabaseModule } from '../database/database.module';
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: configService.get<string>('JWT_EXPIRES_IN') },
+        secret: configService.get<string>('JWT_SECRET', { infer: true }),
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRES_IN', {
+            infer: true,
+          }),
+        },
       }),
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}
