@@ -12,12 +12,14 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { LoginDto, RegisterDto } from './auth.dto';
+import { Public } from '@/common/decorators/public.decorator';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
   @ApiBody({
@@ -33,6 +35,7 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  @Public()
   @Post('login')
   @HttpCode(200)
   @ApiOperation({ summary: 'User login' })
