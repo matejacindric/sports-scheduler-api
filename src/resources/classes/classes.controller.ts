@@ -22,6 +22,7 @@ import { ClassesService } from './classes.service';
 import {
   ClassIdDto,
   CreateClassDto,
+  FilterApplicationsDto,
   FilterClassesDto,
   UpdateClassDto,
 } from './classes.dto';
@@ -63,9 +64,26 @@ export class ClassesController {
   @ApiBadRequestResponse({
     description: 'Schedule conflict or invalid request',
   })
-  async apply(@Param('id') classId: string, @Req() req: AuthenticatedRequest) {
+  async apply(@Param() param: ClassIdDto, @Req() req: AuthenticatedRequest) {
     const userId = req.user.id;
+    const classId = param.id;
     return this.classesService.applyForClass(userId, classId);
+  }
+
+  @Get('/:id/applicants')
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get users who applied for a class in a given period',
+    description:
+      'Only users with the ADMIN role can see all users who applied for a class',
+  })
+  @ApiOkResponse({ description: 'List of applicants' })
+  async getApplicants(
+    @Param() param: ClassIdDto,
+    @Query() filters: FilterApplicationsDto,
+  ) {
+    return this.classesService.getApplicants(param.id, filters);
   }
 
   @Post()
@@ -91,8 +109,8 @@ export class ClassesController {
   @ApiOkResponse({ description: 'Class updated' })
   @ApiForbiddenResponse({ description: 'Forbidden: Admins only' })
   @ApiNotFoundResponse({ description: 'Class not found' })
-  async update(@Param('id') id: string, @Body() dto: UpdateClassDto) {
-    return this.classesService.update(id, dto);
+  async update(@Param() param: ClassIdDto, @Body() dto: UpdateClassDto) {
+    return this.classesService.update(param.id, dto);
   }
 
   @Delete('/:id')
@@ -107,7 +125,7 @@ export class ClassesController {
   })
   @ApiForbiddenResponse({ description: 'Forbidden: Admins only' })
   @ApiNotFoundResponse({ description: 'Class not found' })
-  async delete(@Param('id') id: string) {
-    return this.classesService.delete(id);
+  async delete(@Param() param: ClassIdDto) {
+    return this.classesService.delete(param.id);
   }
 }

@@ -1,11 +1,11 @@
 import { DatabaseService } from '@/core/database/database.service';
-import { classes, classSchedules, sports } from '@/core/database/schema';
+import { classes, classSchedules, sports, users } from '@/core/database/schema';
 import {
   BadRequestException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { eq, and, inArray, SQL } from 'drizzle-orm';
+import { eq, and, inArray, SQL, gte, lte, sql } from 'drizzle-orm';
 import { CreateClassDto, UpdateClassDto } from './classes.dto';
 
 @Injectable()
@@ -97,6 +97,32 @@ export class ClassesService {
         endAt: sportClass.endAt,
       },
     };
+  }
+
+  async getApplicants(
+    classId: string,
+    filters?: { from?: string; to?: string },
+  ) {
+    const conditions: Array<SQL | undefined> = [
+      eq(classSchedules.classId, classId),
+      filters?.from
+        ? gte(sql`DATE(${classSchedules.createdAt})`, new Date(filters.from))
+        : undefined,
+      filters?.to
+        ? lte(sql`DATE(${classSchedules.createdAt})`, new Date(filters.to))
+        : undefined,
+    ].filter(Boolean);
+
+    return this.databaseService.db
+      .select({
+        classId: classSchedules.classId,
+        userId: users.id,
+        userEmail: users.email,
+        appliedDate: sql`DATE(${classSchedules.createdAt})`.as('appliedDate'),
+      })
+      .from(classSchedules)
+      .leftJoin(users, eq(users.id, classSchedules.userId))
+      .where(and(...conditions));
   }
 
   async create(dto: CreateClassDto) {

@@ -3,6 +3,8 @@ import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import {
   ArrayNotEmpty,
   IsArray,
+  IsDate,
+  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsOptional,
@@ -25,6 +27,28 @@ export class ClassIdDto {
   })
   @IsUUID('4')
   id: string;
+}
+
+export class FilterApplicationsDto {
+  @ApiPropertyOptional({
+    description: 'Start date (inclusive) to filter applications',
+    example: '2025-08-01',
+  })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'from must be in YYYY-MM-DD format',
+  })
+  from?: string;
+
+  @ApiPropertyOptional({
+    description: 'End date (inclusive) to filter applications',
+    example: '2025-08-31',
+  })
+  @IsOptional()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'to must be in YYYY-MM-DD format',
+  })
+  to?: string;
 }
 
 export class CreateClassDto {
