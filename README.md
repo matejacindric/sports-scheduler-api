@@ -53,7 +53,7 @@ $ npm run start:dev
 ```
 
 ## Migrations
-**Generate a Migration**
+**Generate a migration**
 
 When you make changes to the database schema:
 
@@ -61,7 +61,7 @@ When you make changes to the database schema:
 npm run db:generate
 ```
 
-**Drop Migrations Safely**
+**Drop migrations safely**
 
 If a migration needs to be removed, never delete it manually.
 Instead, run:
@@ -70,12 +70,20 @@ Instead, run:
 npm run db:migrate-drop
 ```
 
-**Apply Migrations**
+**Apply migrations**
 
 To update your local database schema:
 
 ```bash
 npm run db:migrate-run
+```
+
+**Run seed script**
+
+Run the seed script to add initial data to the database::
+
+```bash
+npm run seed
 ```
 
 ## Run tests
