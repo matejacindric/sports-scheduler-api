@@ -1,16 +1,16 @@
 import { relations, sql } from 'drizzle-orm';
 import {
-  integer,
   pgEnum,
   pgTable,
+  time,
   timestamp,
   uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
 
-export const role = pgEnum('role', ['user', 'employee', 'admin']);
+export const role = pgEnum('role', ['user', 'admin']);
 
-export const weekdayEnum = pgEnum('weekday', [
+export const weekday = pgEnum('weekday', [
   'Monday',
   'Tuesday',
   'Wednesday',
@@ -44,7 +44,7 @@ export const sports = pgTable('sports', {
     .default(sql`gen_random_uuid()`)
     .unique()
     .primaryKey(),
-  name: varchar('name', { length: 256 }).notNull(),
+  name: varchar('name').notNull().unique(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 
@@ -67,8 +67,9 @@ export const classes = pgTable('classes', {
     })
     .notNull(),
   description: varchar('description', { length: 256 }),
-  duration: integer('duration').notNull(),
-  classDays: weekdayEnum('class_days').array().notNull(),
+  classDays: weekday('class_days').array().notNull(),
+  startAt: time('start_at').notNull(),
+  endAt: time('end_at').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
 });
 
