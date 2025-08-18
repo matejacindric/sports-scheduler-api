@@ -154,6 +154,10 @@ export class ClassesService {
       .where(eq(classes.id, id))
       .returning();
 
+    if (!updatedClass) {
+      throw new NotFoundException(`Class with id ${id} not found`);
+    }
+
     return updatedClass;
   }
 

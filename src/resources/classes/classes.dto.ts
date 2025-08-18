@@ -3,8 +3,6 @@ import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import {
   ArrayNotEmpty,
   IsArray,
-  IsDate,
-  IsDateString,
   IsEnum,
   IsNotEmpty,
   IsOptional,

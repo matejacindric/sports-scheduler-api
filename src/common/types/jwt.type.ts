@@ -7,3 +7,7 @@ export type JwtPayload = {
   iat: number;
   exp: number;
 };
+
+export type LoginResponse = {
+  access_token: string;
+};
