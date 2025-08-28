@@ -2,10 +2,11 @@ import 'dotenv/config';
 import { Pool } from 'pg';
 import { seedSportsAndClasses } from './seed/sports-and-classes.seed';
 import { drizzle } from 'drizzle-orm/node-postgres';
+import * as schema from './schema';
 
 async function main() {
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  const db = drizzle(pool);
+  const db = drizzle(pool, { schema });
 
   try {
     await seedSportsAndClasses(db);
