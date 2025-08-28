@@ -9,7 +9,16 @@ export class UsersService {
   constructor(private readonly databaseService: DatabaseService) {}
 
   async create(data: NewUserDto) {
-    return this.databaseService.db.insert(users).values(data).returning();
+    const user = await this.databaseService.db
+      .insert(users)
+      .values(data)
+      .returning({
+        id: users.id,
+        email: users.email,
+        role: users.role,
+        createdAt: users.createdAt,
+      });
+    return user;
   }
 
   async findByEmail(email: string) {
