@@ -4,7 +4,6 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import * as bcrypt from 'bcrypt';
 import * as schema from '../schema';
 
-
 export async function seedSportsAndClasses(db: NodePgDatabase<typeof schema>) {
   const hashedPassword = await bcrypt.hash('password123', 10);
   await db

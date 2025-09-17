@@ -1,4 +1,5 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import {
   ApiBadRequestResponse,
@@ -13,11 +14,15 @@ import {
 } from '@nestjs/swagger';
 import { LoginDto, RegisterDto } from './auth.dto';
 import { Public } from '@/common/decorators/public.decorator';
+import { AppConfigService } from '../config/app-config.service';
 
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly appConfigService: AppConfigService,
+  ) {}
 
   @Public()
   @Post('register')
@@ -41,16 +46,37 @@ export class AuthController {
   @ApiOperation({ summary: 'User login' })
   @ApiBody({ type: LoginDto, description: 'User login data', required: true })
   @ApiOkResponse({
-    description: 'User successfully logged in',
+    description:
+      'User successfully logged in. JWT tokens are set in httpOnly cookies.',
     schema: {
       example: {
         access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
       },
     },
   })
   @ApiUnauthorizedResponse({ description: 'Invalid email or password' })
   @ApiInternalServerErrorResponse({ description: 'Internal server error' })
-  login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken } =
+      await this.authService.login(loginDto);
+
+    const { cookieOptions, jwtExpiresIn, jwtRefreshExpiresIn } =
+      this.appConfigService.auth;
+
+    res.cookie('access_token', accessToken, {
+      ...cookieOptions,
+      maxAge: jwtExpiresIn,
+    });
+
+    res.cookie('refresh_token', refreshToken, {
+      ...cookieOptions,
+      maxAge: jwtRefreshExpiresIn,
+    });
+
+    return { accessToken, refreshToken };
   }
 }

@@ -33,7 +33,7 @@ describe('Classes', () => {
       .send({ email: 'test@example.com', password: 'password123' })
       .expect(200);
     const body = loginRes.body as LoginResponse;
-    jwtToken = body.access_token;
+    jwtToken = body.accessToken;
   });
 
   afterEach(async () => {

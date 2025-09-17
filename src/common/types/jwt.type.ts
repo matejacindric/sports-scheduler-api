@@ -9,5 +9,6 @@ export type JwtPayload = {
 };
 
 export type LoginResponse = {
-  access_token: string;
+  accessToken: string;
+  refreshToken: string;
 };

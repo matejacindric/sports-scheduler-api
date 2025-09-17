@@ -8,9 +8,7 @@ import { ClassesModule } from './resources/classes/classes.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
     ClassesModule,
   ],

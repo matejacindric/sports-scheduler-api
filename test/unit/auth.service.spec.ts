@@ -4,11 +4,14 @@ import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '@/core/auth/auth.service';
 import { UsersService } from '@/resources/users/users.service';
 import { UserRole } from '@/common/enums/user-role';
+import { AppConfigService } from '@/core/config/app-config.service';
+import { AuthConfig } from '@/core/config/auth.config';
 
 describe('register', () => {
   let authService: AuthService;
   let usersService: Partial<UsersService>;
   let jwtService: Partial<JwtService>;
+  let appConfigService: Partial<AppConfigService>;
 
   beforeEach(() => {
     usersService = {
@@ -21,9 +24,28 @@ describe('register', () => {
       verify: jest.fn(),
     };
 
+    const mockAuthConfig = {
+      jwtExpiresIn: 3600000,
+      jwtRefreshExpiresIn: 7 * 24 * 60 * 60 * 1000,
+      cookieOptions: {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax' as 'strict' | 'lax',
+      },
+      nodeEnv: 'dev' as 'dev' | 'prod' | 'test',
+      jwtSecret: 'fake-secret',
+      sameSiteMap: { dev: 'lax', prod: 'strict', test: 'lax' },
+      configService: {} as any,
+    } as Partial<AuthConfig> as AuthConfig;
+
+    appConfigService = {
+      auth: mockAuthConfig,
+    };
+
     authService = new AuthService(
       usersService as UsersService,
       jwtService as JwtService,
+      appConfigService as AppConfigService,
     );
   });
 
@@ -76,19 +98,45 @@ describe('login', () => {
   let authService: AuthService;
   let usersService: Partial<UsersService>;
   let jwtService: Partial<JwtService>;
+  let appConfigService: Partial<AppConfigService>;
 
   beforeEach(() => {
     usersService = {
       findByEmail: jest.fn(),
     };
 
+    // jwtService = {
+    //   sign: jest.fn().mockReturnValue('fake-jwt-token'),
+    // };
     jwtService = {
-      sign: jest.fn().mockReturnValue('fake-jwt-token'),
+      sign: jest
+        .fn()
+        .mockReturnValueOnce('fake-jwt-access-token')
+        .mockReturnValueOnce('fake-jwt-refresh-token'),
+    };
+
+    const mockAuthConfig = {
+      jwtExpiresIn: 3600000,
+      jwtRefreshExpiresIn: 7 * 24 * 60 * 60 * 1000,
+      cookieOptions: {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax' as 'strict' | 'lax',
+      },
+      nodeEnv: 'dev' as 'dev' | 'prod' | 'test',
+      jwtSecret: 'fake-secret',
+      sameSiteMap: { dev: 'lax', prod: 'strict', test: 'lax' },
+      configService: {} as any,
+    } as Partial<AuthConfig> as AuthConfig;
+
+    appConfigService = {
+      auth: mockAuthConfig,
     };
 
     authService = new AuthService(
       usersService as UsersService,
       jwtService as JwtService,
+      appConfigService as AppConfigService,
     );
   });
 
@@ -106,7 +154,10 @@ describe('login', () => {
       password: '123456',
     });
 
-    expect(result).toEqual({ access_token: 'fake-jwt-token' });
+    expect(result).toEqual({
+      accessToken: 'fake-jwt-access-token',
+      refreshToken: 'fake-jwt-refresh-token',
+    });
   });
 
   it('should throw UnauthorizedException if user not found', async () => {

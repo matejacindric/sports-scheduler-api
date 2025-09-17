@@ -8,12 +8,14 @@ import { UsersService } from '@/resources/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto, RegisterDto } from './auth.dto';
 import { UserRole } from '@/common/enums/user-role';
+import { AppConfigService } from '../config/app-config.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private appConfigService: AppConfigService,
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -41,8 +43,13 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
 
     const payload = { sub: user.id, email: user.email, role: user.role };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+
+    const accessToken = this.jwtService.sign(payload);
+
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: this.appConfigService.auth.jwtRefreshExpiresIn,
+    });
+
+    return { accessToken, refreshToken };
   }
 }
